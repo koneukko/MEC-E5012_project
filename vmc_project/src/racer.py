@@ -45,9 +45,9 @@ class Driving(): # main class
 #                trackdrive.angular.z = 0 # No rotation
 
         #initalize the distance
-        print(type(msg.ranges))
+#        print(type(msg.ranges))
         Gamma=np.argmin(msg.ranges)+180
-        print("Smallest distance index (DEG):",Gamma)
+#        print("Smallest distance index (DEG):",Gamma)
         theta=Gamma-90
 
         #Smallest distandce to the wall and it's opposite
