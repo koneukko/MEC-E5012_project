@@ -8,11 +8,11 @@ rospy.init_node('drive')
 
 initialize = False # Run this once to initizalize PID parameters
 if initialize is False:
-	Kp = 1.7
-	Ki = 0.2
+	Kp = 2.5
+	Ki = 0.5
 	Kd = 0
-	integral_clamp = .05 # Anti windup clamp
-	Desired = 0 # Zero crosstrack error is the target value
+	integral_clamp = 0.4# Anti windup clamp
+	Desired = 0.25 # Zero crosstrack error is the target value
 	integral_error = 0 # Initialize integral error
 	previous_error = 0 # Initialize previous error for derivative control
 	initialize is True
@@ -28,34 +28,40 @@ def PID(msg, ct_diff, Kp, Ki, Kd, Desired, integral_error, previous_error, t_0, 
 		
 	controller_output = (Kp * bot_error) + (Ki * integral_error) + (Kd * deriv_error)
 	print("Controller output: %f" %controller_output)
-	velocity.angular.z = -controller_output # Output of controller will be angular velocity command
+	velocity.angular.z = controller_output # Output of controller will be angular velocity command
 	pub.publish(velocity)
 	
 	if controller_output > integral_clamp or controller_output < -integral_clamp: # Anti-windup trick
 		integral_error = 0
-	
 	return
-		
-def callback(msg):
 	
+def callback(msg):
+
+	#if msg.ranges[60] or msg.ranges[300] == int("inf"):
+	#	velocity.linear.x = 0.15
+	#	pub.publish(velocity)
+		
+	lookahead = 0.3
 	t_0 = time.time()
-	ct_diff = msg.ranges[90] - msg.ranges[270] # Find the position of the robot wrt the walls via LiDAR data. 
+	ct_diff = msg.ranges[300] # Find the position of the robot wrt the right wall via LiDAR data. 
 	
 	print("Crosstrack difference: %f" %ct_diff)
 
+	velocity.linear.x = 0.15 # Keep linear velocity constant and publish to /cmd_vel
+	pub.publish(velocity)
+	t_1 = time.time()
 	
-	if msg.ranges[90] != float("inf") and msg.ranges[270] != float("inf"):
-		velocity.linear.x = 0.2 # Keep linear velocity constant and publish to /cmd_vel
+	if ct_diff < 0.2 or ct_diff > 0.4 :
+		velocity.linear.x = 0.12
 		pub.publish(velocity)
-		t_1 = time.time()
-		PID(msg, ct_diff, Kp, Ki, Kd, Desired, integral_error, previous_error, t_0, t_1)
-	else:
-		velocity.linear.x = 0
-		velocity.angular.z = 0
-		pub.publish(velocity)
-		print("End of track reached!")
-		rospy.spin()
-
+		print("LOWER")
+	
+	PID(msg, ct_diff, Kp, Ki, Kd, Desired, integral_error, previous_error, t_0, t_1)
+	#elif msg.ranges[2] or msg.ranges[358] < lookahead:
+	#	min_dist = max(msg.ranges[60], msg.ranges[300])
+	#	ct_diff = min_dist
+	#	PID(msg, ct_diff, Kp, Ki, Kd, Desired, integral_error, previous_error, t_0, t_1)
+		
 
 sub = rospy.Subscriber('/scan', LaserScan, callback)
 pub = rospy.Publisher('/cmd_vel', Twist, queue_size = 1)
