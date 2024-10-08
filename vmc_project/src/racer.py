@@ -1,165 +1,66 @@
 #! /usr/bin/env python3
 import rospy
-import numpy as np
-
+import time
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
-# ham hammy
-class Driving(): # main class
+rospy.init_node('drive')
 
-	def __init__(self):
-		global trackdrive
-		trackdrive = Twist()
-		self.pub = rospy.Publisher('cmd_vel', Twist, queue_size = 10) # Publish velocity command
-		self.sub = rospy.Subscriber('/scan', LaserScan, self.callback) # Subscribe to Lidar data
-			
-
-	def callback(self, msg):
-		print("The front LiDAR reading is: %f" %msg.ranges[0])
-		print("The left LiDAR reading is : %f" %msg.ranges[90])
-		print("The right LiDAR reading is: %f" %msg.ranges[270])
+initialize = False # Run this once to initizalize PID parameters
+if initialize is False:
+	Kp = 1.7
+	Ki = 0.2
+	Kd = 0
+	integral_clamp = .05 # Anti windup clamp
+	Desired = 0 # Zero crosstrack error is the target value
+	integral_error = 0 # Initialize integral error
+	previous_error = 0 # Initialize previous error for derivative control
+	initialize is True
+	
+def PID(msg, ct_diff, Kp, Ki, Kd, Desired, integral_error, previous_error, t_0, t_1):
+	
+	bot_error = Desired - ct_diff
+	
+	integral_error = integral_error + bot_error * (t_1 - t_0)
+	
+	deriv_error = (bot_error - previous_error) / (t_1 - t_0)
+	previous_error = bot_error
 		
+	controller_output = (Kp * bot_error) + (Ki * integral_error) + (Kd * deriv_error)
+	print("Controller output: %f" %controller_output)
+	velocity.angular.z = -controller_output # Output of controller will be angular velocity command
+	pub.publish(velocity)
+	
+	if controller_output > integral_clamp or controller_output < -integral_clamp: # Anti-windup trick
+		integral_error = 0
+	
+	return
 		
-		self.distance = 0.198
-		if msg.ranges[0] > self.distance and msg.ranges[90] > self.distance and msg.ranges[270] > self.distance:
-		# clear path
-			trackdrive.linear.x = 0.2 # Forward through the track
-			trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[270] < self.distance:
-		# path blocked by track wall at 275 deg
-			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = 0.5 # Rotation to the left (ccw)
-			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
-				# path is clear again
-				trackdrive.linear.x = 0.2
-				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[315] < self.distance:
-		# path blocked by track wall at 275 deg
-			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = 0.5 # Rotation to the left (ccw)
-			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
-				# path is clear again
-				trackdrive.linear.x = 0.2
-				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[330] < self.distance:
-		# path blocked by track wall at 275 deg
-			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = 0.5 # Rotation to the left (ccw)
-			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
-				# path is clear again
-				trackdrive.linear.x = 0.2
-				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[345] < self.distance + 0.08:
-		# path blocked by track wall at 275 deg
-			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = 0.5 # Rotation to the left (ccw)
-			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
-				# path is clear again
-				trackdrive.linear.x = 0.2
-				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[352] < self.distance + 0.08:
-		# path blocked by track wall at 275 deg
-			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = 0.5 # Rotation to the left (ccw)
-			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
-				# path is clear again
-				trackdrive.linear.x = 0.2
-				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[357] < self.distance + 0.05:
-		# path blocked by track wall at 275 deg
-			trackdrive.linear.x = 0.08
-			trackdrive.angular.z = 0.6 # Rotation to the left (ccw)
-			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
-				# path is clear again
-				trackdrive.linear.x = 0.2
-				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[359] < self.distance + 0.1:
-		# path blocked by track wall at 275 deg
-			trackdrive.linear.x = 0.02
-			trackdrive.angular.z = 0.6 # Rotation to the left (ccw)
-			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
-				# path is clear again
-				trackdrive.linear.x = 0.2
-				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[90] < self.distance:
-		#path blocked by track wall at 90 deg
-			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = -0.5 # Rotation to the right (cw)
-			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
-				# path is clear again
-				trackdrive.linear.x = 0.2
-				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[45] < self.distance:
-		#path blocked by track wall at 45 deg
-			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = -0.5 # Rotation to the right (cw)
-			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
-				# path is clear again
-				trackdrive.linear.x = 0.2
-				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[30] < self.distance + 0.06:
-		#path blocked by track wall at 45 deg
-			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = -0.5 # Rotation to the right (cw)
-			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
-				# path is clear again
-				trackdrive.linear.x = 0.2
-				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[15] < self.distance:
-		#path blocked by track wall at 45 deg
-			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = -0.5 # Rotation to the right (cw)
-			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
-				# path is clear again
-				trackdrive.linear.x = 0.2
-				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[7] < self.distance:
-		#path blocked by track wall at 45 deg
-			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = -0.5 # Rotation to the right (cw)
-			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
-				# path is clear again
-				trackdrive.linear.x = 0.2
-				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[3] < self.distance:
-		#path blocked by track wall at 45 deg
-			trackdrive.linear.x = 0.08
-			trackdrive.angular.z = -0.6 # Rotation to the right (cw)
-			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
-				# path is clear again
-				trackdrive.linear.x = 0.2
-				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[1] < self.distance:
-		#path blocked by track wall at 45 deg
-			trackdrive.linear.x = 0.02
-			trackdrive.angular.z = -0.6 # Rotation to the right (cw)
-			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
-				# path is clear again
-				trackdrive.linear.x = 0.2
-				trackdrive.angular.z = 0 # No rotation
-		#if msg.ranges[90] == float("inf") and msg.ranges[270] == float("inf"):
-		#	trackdrive.linear.x = 0 # End of track
-		#	trackdrive.angular.z = 0 # End of track
-		self.pub.publish(trackdrive) # Publish command for forward movement
-		
-		
-if __name__ == '__main__':
-	rospy.init_node('trackdriving_node') #initialise
-	Driving()
-	rospy.spin()
-			
-			
+def callback(msg):
+	
+	t_0 = time.time()
+	ct_diff = msg.ranges[90] - msg.ranges[270] # Find the position of the robot wrt the walls via LiDAR data. 
+	
+	print("Crosstrack difference: %f" %ct_diff)
+
+	
+	if msg.ranges[90] != float("inf") and msg.ranges[270] != float("inf"):
+		velocity.linear.x = 0.2 # Keep linear velocity constant and publish to /cmd_vel
+		pub.publish(velocity)
+		t_1 = time.time()
+		PID(msg, ct_diff, Kp, Ki, Kd, Desired, integral_error, previous_error, t_0, t_1)
+	else:
+		velocity.linear.x = 0
+		velocity.angular.z = 0
+		pub.publish(velocity)
+		print("End of track reached!")
+		rospy.spin()
 
 
+sub = rospy.Subscriber('/scan', LaserScan, callback)
+pub = rospy.Publisher('/cmd_vel', Twist, queue_size = 1)
+velocity = Twist()
 
-
-#sub = rospy.Subscriber('/scan', LaserScan, callback)
-#pub = rospy.Publisher('/cmd_vel', Twist, queue_size = 1)
-
-#vel = Twist() 
-#vel.linear.x = 0.1
-#rate = rospy.Rate(100)
-#while not rospy.is_shutdown():
-#	pub.publish(vel)
-#	rate.sleep()
+rate = rospy.Rate(50)
+while not rospy.is_shutdown():
+	rate.sleep()
