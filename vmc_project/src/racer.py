@@ -7,6 +7,26 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 
+def PID(self, error, t_0, t_1):
+    #Take in the loop start time and measured error and the self class
+    #Output PID control command
+
+    #Define new integral error
+    self.integral_error += error *(t_1 -t_0)
+
+    #Define derivative error
+    deriv_error = (error - self.previous_error) / (t_1 -t_0)
+    self.previous_error
+
+    controller_output = (self.Kp * error) + (self.Ki * self.integral_error) + (self.Kd * deriv_error)
+        
+
+    if controller_output > self.integral_clamp or controller_output < -self.integral_clamp: # Anti-windup trick
+        self.integral_error = 0
+
+    return controller_output
+
+
 class Driving(): # main class
 
     def __init__(self):
@@ -20,32 +40,13 @@ class Driving(): # main class
         self.previous_error = 0
         
         #Initalize the constants
-        self.Kp = 1.7
-        self.Ki = 0.2
+        self.Kp = 0.0002
+        self.Ki = 0.0001
         self.Kd = 0
 
         self.integral_clamp = 0.1
 
-    def PID(self, error, t_0, t_1):
-        #Take in the loop start time and measured error and the self class
-        #Output PID control command
-
-        #Define new integral error
-        self.integral_error += error *(t_1 -t_0)
-
-        #Define derivative error
-        deriv_error = (error - self.previous_error) / (t_1 -t_0)
-        self.previous_error
-
-        controller_output = (self.Kp * error) + (self.Ki * self.integral_error) + (self.Kd * deriv_error)
-        
-
-        if controller_output > self.integral_clamp or controller_output < -self.integral_clamp: # Anti-windup trick
-            self.integral_error = 0
-
-        return -controller_output
-
-
+    
     def callback(self, msg):
 
         t_0 = time.time()
@@ -54,7 +55,7 @@ class Driving(): # main class
         print("The left LiDAR reading is : %f" %msg.ranges[90])
         print("The right LiDAR reading is: %f" %msg.ranges[270])
         
-        trackdrive.linear.x = 0.3 #Constant linear velocity
+        trackdrive.linear.x = 0.15 #Constant linear velocity
 
         self.distance = 0.19
         #All of the below is left as comments for now
@@ -81,9 +82,15 @@ class Driving(): # main class
 
         #initalize the distance
 #        print(type(msg.ranges))
-        Gamma=np.argmin(msg.ranges)+180
+
+        if np.argmin(msg.ranges) < 180:
+            Gamma=np.argmin(msg.ranges)+180
+            theta=Gamma-90
+        else:
+            Gamma=np.argmin(msg.ranges)-180
+            theta=Gamma-90
+
 #        print("Smallest distance index (DEG):",Gamma)
-        theta=Gamma-90
 
         #Smallest distandce to the wall and it's opposite
         Least = msg.ranges[np.argmin(msg.ranges)]
@@ -94,7 +101,7 @@ class Driving(): # main class
         x_vehicle = 0 # The world coordinate system is at this place
 
         #Lookahead point in world coordinate system
-        x_g=0.5
+        x_g=0.1
         y_g=0
 
         #coordinate transformation
@@ -118,9 +125,11 @@ class Driving(): # main class
             trackdrive.angular.z = 0 # End of track
 
         self.pub.publish(trackdrive) # Publish command for forward movement
+        print(trackdrive)
 
 
 if __name__ == '__main__':
     rospy.init_node('trackdriving_node') #initialise
+    rospy.Rate(10)
     Driving()
     rospy.spin()
