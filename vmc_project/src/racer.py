@@ -5,7 +5,7 @@ import numpy as np
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
-
+# ham hammy
 class Driving(): # main class
 
 	def __init__(self):
