@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 import rospy
 import numpy as np
+import time
 
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
@@ -14,12 +15,46 @@ class Driving(): # main class
         self.pub = rospy.Publisher('cmd_vel', Twist, queue_size = 10) # Publish velocity command
         self.sub = rospy.Subscriber('/scan', LaserScan, self.callback) # Subscribe to Lidar data
 
+        #Initalize the errors
+        self.integral_error = 0
+        self.previous_error = 0
+        
+        #Initalize the constants
+        self.Kp = 1.7
+        self.Ki = 0.2
+        self.Kd = 0
+
+        self.integral_clamp = 0.1
+
+    def PID(self, error, t_0, t_1):
+        #Take in the loop start time and measured error and the self class
+        #Output PID control command
+
+        #Define new integral error
+        self.integral_error += error *(t_1 -t_0)
+
+        #Define derivative error
+        deriv_error = (error - self.previous_error) / (t_1 -t_0)
+        self.previous_error
+
+        controller_output = (self.Kp * error) + (self.Ki * self.integral_error) + (self.Kd * deriv_error)
+        
+
+        if controller_output > self.integral_clamp or controller_output < -self.integral_clamp: # Anti-windup trick
+            self.integral_error = 0
+
+        return -controller_output
+
 
     def callback(self, msg):
+
+        t_0 = time.time()
+
         print("The front LiDAR reading is: %f" %msg.ranges[0])
         print("The left LiDAR reading is : %f" %msg.ranges[90])
         print("The right LiDAR reading is: %f" %msg.ranges[270])
         
+        trackdrive.linear.x = 0.3 #Constant linear velocity
 
         self.distance = 0.19
         #All of the below is left as comments for now
@@ -65,6 +100,17 @@ class Driving(): # main class
         #coordinate transformation
         x_gv = (x_g - x_vehicle)*np.cos(np.deg2rad(theta)) + (y_g - y_vehicle)*np.sin(np.deg2rad(theta))
         y_gv = (x_g - x_vehicle)*np.sin(np.deg2rad(theta)) + (y_g - y_vehicle)*np.cos(np.deg2rad(theta))
+
+        # Determine the control angle alpha on vehicle coordinate system
+        alpha = np.arctan(x_gv/y_gv)
+
+        #The current heading theta is used to implement a closed loop error
+
+        angle_error = alpha - theta
+
+        t_1 = time.time()
+        
+        trackdrive.angular.z = PID(self, angle_error,t_0,t_1) # Rotation to the controller dictated direction
 
 
         if msg.ranges[90] == float("inf") and msg.ranges[270] == float("inf"):
