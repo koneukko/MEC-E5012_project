@@ -9,11 +9,11 @@ rospy.init_node('drive')
 
 initialize = False # Run this once to initizalize PID parameters
 if initialize is False:
-	Kp = 4.6
-	Ki = 0.1
+	Kp = 4.25
+	Ki = 0.005
 	Kd = 0
-	integral_clamp = .2# Anti windup clamp
-	Desired = 0.27 # Zero crosstrack error is the target value
+	integral_clamp = .01# Anti windup clamp
+	Desired = 0.25 # Zero crosstrack error is the target value
 	integral_error = 0 # Initialize integral error
 	previous_error = 0 # Initialize previous error for derivative control
 	t_lapsed = 0
@@ -41,7 +41,7 @@ def PID(msg, rightStick, Kp, Ki, Kd, Desired, integral_error, previous_error, t_
 		print("CLAMPED")
 	return
 def END(msg, DirectLeft, DirectRight, SecondLeft, SecondRight, leftStick, rightStick):
-	velocity.linear.x = 0.6 # Keep linear velocity constant and publish to /cmd_vel
+	velocity.linear.x = 1 # Keep linear velocity constant and publish to /cmd_vel
 	velocity.angular.z = 0
 	pub.publish(velocity)
 	
@@ -64,8 +64,9 @@ def callback(msg):
 	rightStick = msg.ranges[315] # Find the position of the robot wrt the right wall via LiDAR data.
 	leftStick = msg.ranges[45]
 	frontDist = msg.ranges[0]
-	SecondLeft = msg.ranges[10]
-	SecondRight = msg.ranges[350]
+	SecondLeft = msg.ranges[20]
+	SecondRight = msg.ranges[340]
+	ThirdRight = msg.ranges[325]
 	DirectRight = msg.ranges[270]
 	DirectLeft = msg.ranges[90] 
 	#DesiredPieSlice = (1/12) * 3.1415 * 0.3**2
@@ -74,17 +75,15 @@ def callback(msg):
 	t_1 = time.time()
 	
 	#realPieSlice = (1/12) * 3.1415 * frontDist**2
-	if leftStick and rightStick != float("inf"):
-		if rightStick <= 0.4 and frontDist < 0.4:
-			velocity.linear.x = 0.0
-			pub.publish(velocity)
-			PID(msg, leftStick, -Kp, -Ki, -Kd, Desired, integral_error, previous_error, t_0, t_1)
-			print("AVOIDING")
-	
-		if frontDist and SecondRight > 0.4:
-			velocity.linear.x = 0.35 # Keep linear velocity constant and publish to /cmd_vel
+	if rightStick != float("inf"):
+		if rightStick >= Desired and frontDist > 0.45 and SecondRight > 0.45 and ThirdRight > 0.45:
+			velocity.linear.x = 0.45 # Keep linear velocity constant and publish to /cmd_vel
 			pub.publish(velocity)
 			PID(msg, rightStick, Kp, Ki, Kd, Desired, integral_error, previous_error, t_0, t_1)
+		else:
+			velocity.linear.x = 0.45 # Keep linear velocity constant and publish to /cmd_vel
+			pub.publish(velocity)
+			PID(msg, leftStick, -Kp, -Ki, -Kd, Desired, integral_error, previous_error, t_0, t_1)
 	else:
 		END(msg, DirectLeft, DirectRight, SecondLeft, SecondRight, leftStick, rightStick)
 		
@@ -108,6 +107,6 @@ sub = rospy.Subscriber('/scan', LaserScan, callback)
 pub = rospy.Publisher('/cmd_vel', Twist, queue_size = 1)
 velocity = Twist()
 
-rate = rospy.Rate(50)
+rate = rospy.Rate(200)
 while not rospy.is_shutdown():
 	rate.sleep()
