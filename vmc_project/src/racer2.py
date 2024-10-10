@@ -9,7 +9,7 @@ rospy.init_node('drive')
 
 initialize = False # Run this once to initizalize PID parameters
 if initialize is False:
-	Kp = 2.3
+	Kp = 2.4
 	Ki = 0.001
 	Kd = 0
 	t_lapstart = time.time()
@@ -43,7 +43,7 @@ def PID(msg, rightStick, Kp, Ki, Kd, Desired, integral_error, previous_error, t_
 		print("CLAMPED")
 	return
 def END(msg, DirectLeft, DirectRight, SecondLeft, SecondRight, leftStick, rightStick):
-	velocity.linear.x = 3.2 # Keep linear velocity constant and publish to /cmd_vel
+	velocity.linear.x = 3.1 # Keep linear velocity constant and publish to /cmd_vel
 	velocity.angular.z = 0
 	pub.publish(velocity)
 	
@@ -78,11 +78,11 @@ def callback(msg):
 	
 	if rightStick != float("inf"):
 		if rightStick >= Desired and frontDist > LookaheadDist and SecondRight > LookaheadDist and ThirdRight > LookaheadDist and FourthRight > LookaheadDist:
-			velocity.linear.x = 0.49 # Keep linear velocity constant and publish to /cmd_vel
+			velocity.linear.x = 0.485 # Keep linear velocity constant and publish to /cmd_vel
 			pub.publish(velocity)
 			PID(msg, rightStick, Kp, Ki, Kd, Desired, integral_error, previous_error, t_0, t_1)
 		else:
-			velocity.linear.x = 0.49 # Keep linear velocity constant and publish to /cmd_vel
+			velocity.linear.x = 0.485 # Keep linear velocity constant and publish to /cmd_vel
 			pub.publish(velocity)
 			PID(msg, leftStick, -Kp, -Ki, -Kd, Desired, integral_error, previous_error, t_0, t_1)
 	else:
