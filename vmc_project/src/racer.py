@@ -22,6 +22,13 @@ class Driving(): # main class
 		
 		
 		self.distance = 0.198
+		#LidarRangeRight = [1] * 45
+		#for i in range(44):
+			#rangeval = int(i + 315)
+			#LidarRangeRight[i] = msg.ranges[rangeval]
+			# i =+ 1
+			
+		# LidarRangeRight = msg.ranges[345,346,347,348,349,350,351,352,353,354,355,356,357,358,359]
 		if msg.ranges[0] > self.distance and msg.ranges[90] > self.distance and msg.ranges[270] > self.distance:
 		# clear path
 			trackdrive.linear.x = 0.2 # Forward through the track
@@ -29,15 +36,23 @@ class Driving(): # main class
 		if msg.ranges[270] < self.distance:
 		# path blocked by track wall at 275 deg
 			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = 0.5 # Rotation to the left (ccw)
+			trackdrive.angular.z = 1.8 # Rotation to the left (ccw)
 			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
 				# path is clear again
 				trackdrive.linear.x = 0.2
 				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[315] < self.distance:
+		if msg.ranges[315] > self.distance:
 		# path blocked by track wall at 275 deg
 			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = 0.5 # Rotation to the left (ccw)
+			trackdrive.angular.z = 2.8 # Rotation to the left (ccw)
+			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
+				# path is clear again
+				trackdrive.linear.x = 0.2
+				trackdrive.angular.z = 0 # No rotation
+		if msg.ranges[323] < self.distance:
+		# path blocked by track wall at 275 deg
+			trackdrive.linear.x = 0.1
+			trackdrive.angular.z = 1.8 # Rotation to the left (ccw)
 			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
 				# path is clear again
 				trackdrive.linear.x = 0.2
@@ -45,39 +60,88 @@ class Driving(): # main class
 		if msg.ranges[330] < self.distance:
 		# path blocked by track wall at 275 deg
 			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = 0.5 # Rotation to the left (ccw)
+			trackdrive.angular.z = 1.8 # Rotation to the left (ccw)
 			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
 				# path is clear again
 				trackdrive.linear.x = 0.2
 				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[345] < self.distance + 0.08:
+		#if LidarRangeRight < self.distance + 0.1:
+		if msg.ranges[337] < self.distance:
 		# path blocked by track wall at 275 deg
-			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = 0.5 # Rotation to the left (ccw)
+			trackdrive.linear.x = 0.04
+			trackdrive.angular.z = 1.8 # Rotation to the left (ccw)
 			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
 				# path is clear again
 				trackdrive.linear.x = 0.2
 				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[352] < self.distance + 0.08:
-		# path blocked by track wall at 275 deg
-			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = 0.5 # Rotation to the left (ccw)
-			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
-				# path is clear again
-				trackdrive.linear.x = 0.2
-				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[357] < self.distance + 0.05:
-		# path blocked by track wall at 275 deg
-			trackdrive.linear.x = 0.08
-			trackdrive.angular.z = 0.6 # Rotation to the left (ccw)
-			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
-				# path is clear again
-				trackdrive.linear.x = 0.2
-				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[359] < self.distance + 0.1:
+		if msg.ranges[345] < self.distance + 0.15:
 		# path blocked by track wall at 275 deg
 			trackdrive.linear.x = 0.02
-			trackdrive.angular.z = 0.6 # Rotation to the left (ccw)
+			trackdrive.angular.z = 2.8 # Rotation to the left (ccw)
+			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
+				# path is clear again
+				trackdrive.linear.x = 0.2
+				trackdrive.angular.z = 0 # No rotation
+		if msg.ranges[347] < self.distance + 0.12:
+		# path blocked by track wall at 275 deg
+			trackdrive.linear.x = 0.02
+			trackdrive.angular.z = 2.8 # Rotation to the left (ccw)
+			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
+				# path is clear again
+				trackdrive.linear.x = 0.2
+				trackdrive.angular.z = 0 # No rotation
+		if msg.ranges[350] < self.distance + 0.1:
+		# path blocked by track wall at 275 deg
+			trackdrive.linear.x = 0.02
+			trackdrive.angular.z = 2.8 # Rotation to the left (ccw)
+			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
+				# path is clear again
+				trackdrive.linear.x = 0.2
+				trackdrive.angular.z = 0 # No rotation
+		if msg.ranges[353] < self.distance + 0.1:
+		# path blocked by track wall at 275 deg
+			trackdrive.linear.x = 0.01
+			trackdrive.angular.z = 2.8 # Rotation to the left (ccw)
+			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
+				# path is clear again
+				trackdrive.linear.x = 0.2
+				trackdrive.angular.z = 0 # No rotation
+		if msg.ranges[355] < self.distance + 0.1:
+		# path blocked by track wall at 275 deg
+			trackdrive.linear.x = 0.01
+			trackdrive.angular.z = 2.8 # Rotation to the left (ccw)
+			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
+				# path is clear again
+				trackdrive.linear.x = 0.2
+				trackdrive.angular.z = 0 # No rotation
+		if msg.ranges[356] < self.distance + 0.1:
+		# path blocked by track wall at 275 deg
+			trackdrive.linear.x = 0.01
+			trackdrive.angular.z = 2.8 # Rotation to the left (ccw)
+			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
+				# path is clear again
+				trackdrive.linear.x = 0.2
+				trackdrive.angular.z = 0 # No rotation
+		if msg.ranges[357] < self.distance + 0.12:
+		# path blocked by track wall at 275 deg
+			trackdrive.linear.x = 0.01
+			trackdrive.angular.z = 2.8 # Rotation to the left (ccw)
+			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
+				# path is clear again
+				trackdrive.linear.x = 0.2
+				trackdrive.angular.z = 0 # No rotation
+		if msg.ranges[358] < self.distance + 0.12:
+		# path blocked by track wall at 275 deg
+			trackdrive.linear.x = 0.01
+			trackdrive.angular.z = 2.8 # Rotation to the left (ccw)
+			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
+				# path is clear again
+				trackdrive.linear.x = 0.2
+				trackdrive.angular.z = 0 # No rotation
+		if msg.ranges[359] < self.distance + 0.12:
+		# path blocked by track wall at 275 deg
+			trackdrive.linear.x = 0.01
+			trackdrive.angular.z = 2.8 # Rotation to the left (ccw)
 			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
 				# path is clear again
 				trackdrive.linear.x = 0.2
@@ -85,55 +149,111 @@ class Driving(): # main class
 		if msg.ranges[90] < self.distance:
 		#path blocked by track wall at 90 deg
 			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = -0.5 # Rotation to the right (cw)
+			trackdrive.angular.z = -1.0 # Rotation to the right (cw)
 			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
 				# path is clear again
 				trackdrive.linear.x = 0.2
 				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[45] < self.distance:
+		if msg.ranges[45] > self.distance:
 		#path blocked by track wall at 45 deg
-			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = -0.5 # Rotation to the right (cw)
+			trackdrive.linear.x = 0.06
+			trackdrive.angular.z = 1.8 # Rotation to the right (cw)
 			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
 				# path is clear again
 				trackdrive.linear.x = 0.2
 				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[30] < self.distance + 0.06:
+		if msg.ranges[41] < self.distance:
 		#path blocked by track wall at 45 deg
-			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = -0.5 # Rotation to the right (cw)
+			trackdrive.linear.x = 0.06
+			trackdrive.angular.z = -1.0 # Rotation to the right (cw)
+			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
+				# path is clear again
+				trackdrive.linear.x = 0.2
+				trackdrive.angular.z = 0 # No rotation
+		if msg.ranges[37] < self.distance:
+		#path blocked by track wall at 45 deg
+			trackdrive.linear.x = 0.06
+			trackdrive.angular.z = -1.0 # Rotation to the right (cw)
+			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
+				# path is clear again
+				trackdrive.linear.x = 0.2
+				trackdrive.angular.z = 0 # No rotation
+		if msg.ranges[30] < self.distance:
+		#path blocked by track wall at 45 deg
+			trackdrive.linear.x = 0.06
+			trackdrive.angular.z = -1.0 # Rotation to the right (cw)
+			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
+				# path is clear again
+				trackdrive.linear.x = 0.2
+				trackdrive.angular.z = 0 # No rotation
+		if msg.ranges[23] < self.distance:
+		#path blocked by track wall at 45 deg
+			trackdrive.linear.x = 0.06
+			trackdrive.angular.z = -1.0 # Rotation to the right (cw)
+			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
+				# path is clear again
+				trackdrive.linear.x = 0.2
+				trackdrive.angular.z = 0 # No rotation
+		if msg.ranges[17] < self.distance:
+		#path blocked by track wall at 45 deg
+			trackdrive.linear.x = 0.06
+			trackdrive.angular.z = -1.0 # Rotation to the right (cw)
 			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
 				# path is clear again
 				trackdrive.linear.x = 0.2
 				trackdrive.angular.z = 0 # No rotation
 		if msg.ranges[15] < self.distance:
 		#path blocked by track wall at 45 deg
-			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = -0.5 # Rotation to the right (cw)
+			trackdrive.linear.x = 0.04
+			trackdrive.angular.z = -1.0 # Rotation to the right (cw)
+			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
+				# path is clear again
+				trackdrive.linear.x = 0.2
+				trackdrive.angular.z = 0 # No rotation
+		if msg.ranges[12] < self.distance:
+		#path blocked by track wall at 45 deg
+			trackdrive.linear.x = 0.04
+			trackdrive.angular.z = -1.0 # Rotation to the right (cw)
+			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
+				# path is clear again
+				trackdrive.linear.x = 0.2
+				trackdrive.angular.z = 0 # No rotation
+		if msg.ranges[9] < self.distance:
+		#path blocked by track wall at 45 deg
+			trackdrive.linear.x = 0.04
+			trackdrive.angular.z = -1.0 # Rotation to the right (cw)
 			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
 				# path is clear again
 				trackdrive.linear.x = 0.2
 				trackdrive.angular.z = 0 # No rotation
 		if msg.ranges[7] < self.distance:
 		#path blocked by track wall at 45 deg
-			trackdrive.linear.x = 0.1
-			trackdrive.angular.z = -0.5 # Rotation to the right (cw)
+			trackdrive.linear.x = 0.02
+			trackdrive.angular.z = -1.0 # Rotation to the right (cw)
+			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
+				# path is clear again
+				trackdrive.linear.x = 0.2
+				trackdrive.angular.z = 0 # No rotation
+		if msg.ranges[5] < self.distance:
+		#path blocked by track wall at 45 deg
+			trackdrive.linear.x = 0.02
+			trackdrive.angular.z = -1.0 # Rotation to the right (cw)
 			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
 				# path is clear again
 				trackdrive.linear.x = 0.2
 				trackdrive.angular.z = 0 # No rotation
 		if msg.ranges[3] < self.distance:
 		#path blocked by track wall at 45 deg
-			trackdrive.linear.x = 0.08
-			trackdrive.angular.z = -0.6 # Rotation to the right (cw)
+			trackdrive.linear.x = 0.02
+			trackdrive.angular.z = -1.0 # Rotation to the right (cw)
 			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
 				# path is clear again
 				trackdrive.linear.x = 0.2
 				trackdrive.angular.z = 0 # No rotation
-		if msg.ranges[1] < self.distance:
+		if msg.ranges[1] < self.distance - 0.02:
 		#path blocked by track wall at 45 deg
 			trackdrive.linear.x = 0.02
-			trackdrive.angular.z = -0.6 # Rotation to the right (cw)
+			trackdrive.angular.z = -1.0 # Rotation to the right (cw)
 			if msg.ranges [0] > self.distance and msg.ranges[45] > self.distance and msg.ranges[315] > self.distance:
 				# path is clear again
 				trackdrive.linear.x = 0.2
@@ -146,6 +266,7 @@ class Driving(): # main class
 		
 if __name__ == '__main__':
 	rospy.init_node('trackdriving_node') #initialise
+	rate = rospy.Rate(100)
 	Driving()
 	rospy.spin()
 			
