@@ -8,9 +8,9 @@ rospy.init_node('drive')
 
 initialize = False # Run this once to initizalize PID parameters
 if initialize is False:
-	Kp = 2.5
-	Ki = 0.5
-	Kd = 0
+	Kp = 6.5
+	Ki = 1.5
+	Kd = 0.0001
 	integral_clamp = 0.4# Anti windup clamp
 	Desired = 0.25 # Zero crosstrack error is the target value
 	integral_error = 0 # Initialize integral error
@@ -43,16 +43,16 @@ def callback(msg):
 		
 	lookahead = 0.3
 	t_0 = time.time()
-	ct_diff = msg.ranges[300] # Find the position of the robot wrt the right wall via LiDAR data. 
+	ct_diff = msg.ranges[315] # Find the position of the robot wrt the right wall via LiDAR data. 
 	
 	print("Crosstrack difference: %f" %ct_diff)
 
-	velocity.linear.x = 0.15 # Keep linear velocity constant and publish to /cmd_vel
+	velocity.linear.x = 0.3 # Keep linear velocity constant and publish to /cmd_vel
 	pub.publish(velocity)
 	t_1 = time.time()
 	
-	if ct_diff < 0.2 or ct_diff > 0.4 :
-		velocity.linear.x = 0.12
+	if ct_diff < 0.2 or ct_diff > 0.5 :
+		velocity.linear.x = 0.05
 		pub.publish(velocity)
 		print("LOWER")
 	
