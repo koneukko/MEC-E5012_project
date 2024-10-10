@@ -78,11 +78,11 @@ def callback(msg):
 	
 	if rightStick != float("inf"):
 		if rightStick >= Desired and frontDist > LookaheadDist and SecondRight > LookaheadDist and ThirdRight > LookaheadDist and FourthRight > LookaheadDist:
-			velocity.linear.x = 0.485 # Keep linear velocity constant and publish to /cmd_vel
+			velocity.linear.x = 0.48 # Keep linear velocity constant and publish to /cmd_vel
 			pub.publish(velocity)
 			PID(msg, rightStick, Kp, Ki, Kd, Desired, integral_error, previous_error, t_0, t_1)
 		else:
-			velocity.linear.x = 0.485 # Keep linear velocity constant and publish to /cmd_vel
+			velocity.linear.x = 0.48 # Keep linear velocity constant and publish to /cmd_vel
 			pub.publish(velocity)
 			PID(msg, leftStick, -Kp, -Ki, -Kd, Desired, integral_error, previous_error, t_0, t_1)
 	else:
