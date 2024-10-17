@@ -85,9 +85,9 @@ def callback(msg):
 				PID(msg, rightStick, (Kp * 1.58), Ki, Kd, (Desired * 1), integral_error, previous_error, t_0, t_1)
 				
 		if t_lap >= 19 and t_lap < 24:
-			velocity.linear.x = 0.52 # Keep linear velocity constant and publish to /cmd_vel
+			velocity.linear.x = 0.51 # Keep linear velocity constant and publish to /cmd_vel
 			pub.publish(velocity)
-			LookaheadDist = .465 *.80
+			LookaheadDist = .465 *.75
 			if leftStick >= (Desired) and frontDist > LookaheadDist and SecondLeft > LookaheadDist and ThirdLeft > LookaheadDist and FourthLeft > LookaheadDist:
 				PID(msg, leftStick, (-Kp*1.5), -Ki, -Kd, Desired, integral_error, previous_error, t_0, t_1)
 			else:
