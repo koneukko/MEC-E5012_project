@@ -9,15 +9,16 @@ rospy.init_node('drive')
 
 initialize = False # Run this once to initizalize PID parameters
 if initialize is False:
-	Kp = 4.3
-	Ki = 0.005
+	Kp = 1.75
+	Ki = 0.001
 	Kd = 0
+	t_lapstart = time.time()
 	integral_clamp = .01# Anti windup clamp
-	Desired = 0.25 # Zero crosstrack error is the target value
+	Desired = 0.2 # Zero crosstrack error is the target value
 	integral_error = 0 # Initialize integral error
 	previous_error = 0 # Initialize previous error for derivative control
 	t_lapsed = 0
-	LookaheadDist = .45
+	LookaheadDist = .465
 	print("initialized")
 	initialize is True
 	
@@ -32,17 +33,15 @@ def PID(msg, rightStick, Kp, Ki, Kd, Desired, integral_error, previous_error, t_
 	previous_error = bot_error
 		
 	controller_output = (Kp * bot_error) + (Ki * integral_error) + (Kd * deriv_error)
-	print("Controller output: %f" %controller_output)
+
 	velocity.angular.z = controller_output # Output of controller will be angular velocity command
 	pub.publish(velocity)
 	
 	if controller_output > integral_clamp or controller_output < -integral_clamp: # Anti-windup trick
 		integral_error = 0
-	
-		print("CLAMPED")
 	return
 def END(msg, DirectLeft, DirectRight, SecondLeft, SecondRight, leftStick, rightStick):
-	velocity.linear.x = 2.8 # Keep linear velocity constant and publish to /cmd_vel
+	velocity.linear.x = 3.8 # Keep linear velocity constant and publish to /cmd_vel
 	velocity.angular.z = 0
 	pub.publish(velocity)
 	
@@ -63,24 +62,44 @@ def callback(msg):
 	frontDist = msg.ranges[0]
 	SecondLeft = msg.ranges[20]
 	SecondRight = msg.ranges[340]
-	ThirdRight = msg.ranges[325]
-	FourthRight = msg.ranges[330]
+	ThirdLeft = msg.ranges[35]
+	FourthLeft = msg.ranges[30]
 	DirectRight = msg.ranges[270]
 	DirectLeft = msg.ranges[90] 
 
-	print("Right Stick: %f" %rightStick)
-
 	t_1 = time.time()
+	t_lap = time.time() - t_lapstart
 	
-	if rightStick != float("inf"):
-		if rightStick >= Desired and frontDist > LookaheadDist and SecondRight > LookaheadDist and ThirdRight > LookaheadDist and FourthRight > LookaheadDist:
-			velocity.linear.x = 0.48 # Keep linear velocity constant and publish to /cmd_vel
+	print("Lap Time: %f" %t_lap)
+	
+	if leftStick != float("inf"):
+		if t_lap < 19:
+			velocity.linear.x = 0.67 # Keep linear velocity constant and publish to /cmd_vel
 			pub.publish(velocity)
-			PID(msg, rightStick, Kp, Ki, Kd, Desired, integral_error, previous_error, t_0, t_1)
-		else:
-			velocity.linear.x = 0.48 # Keep linear velocity constant and publish to /cmd_vel
+			LookaheadDist = .465 
+			if leftStick >= (Desired*1) and frontDist > LookaheadDist and SecondLeft > LookaheadDist and ThirdLeft > LookaheadDist and FourthLeft > LookaheadDist:
+				print("First Sector Speed")
+				PID(msg, leftStick, (-Kp * 1.58), -Ki, -Kd, (Desired * 1), integral_error, previous_error, t_0, t_1)
+			else:
+				print("First Sector Speed")
+				PID(msg, rightStick, (Kp * 1.58), Ki, Kd, (Desired * 1), integral_error, previous_error, t_0, t_1)
+				
+		if t_lap >= 19 and t_lap < 24:
+			velocity.linear.x = 0.52 # Keep linear velocity constant and publish to /cmd_vel
 			pub.publish(velocity)
-			PID(msg, leftStick, -Kp, -Ki, -Kd, Desired, integral_error, previous_error, t_0, t_1)
+			LookaheadDist = .465 *.80
+			if leftStick >= (Desired) and frontDist > LookaheadDist and SecondLeft > LookaheadDist and ThirdLeft > LookaheadDist and FourthLeft > LookaheadDist:
+				PID(msg, leftStick, (-Kp*1.5), -Ki, -Kd, Desired, integral_error, previous_error, t_0, t_1)
+			else:
+				PID(msg, rightStick, (Kp*1.5), Ki, Kd, Desired, integral_error, previous_error, t_0, t_1)
+		if t_lap > 24:
+			velocity.linear.x = 0.638 # Keep linear velocity constant and publish to /cmd_vel
+			pub.publish(velocity)
+			LookaheadDist = .465 * 1.1
+			if leftStick >= Desired and frontDist > LookaheadDist and SecondLeft > LookaheadDist and ThirdLeft > LookaheadDist and FourthLeft > LookaheadDist:
+				PID(msg, leftStick, (-Kp*1.13), -Ki, -Kd, Desired, integral_error, previous_error, t_0, t_1)
+			else:
+				PID(msg, rightStick, (Kp*1.13), Ki, Kd, Desired, integral_error, previous_error, t_0, t_1)
 	else:
 		END(msg, DirectLeft, DirectRight, SecondLeft, SecondRight, leftStick, rightStick)
 		
